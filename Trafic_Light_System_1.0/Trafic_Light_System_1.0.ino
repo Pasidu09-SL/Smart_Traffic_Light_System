@@ -1,24 +1,24 @@
 // Define pins for traffic lights
 
-// Road 1 (3 lanes)
+// Road 1 (3 lanes) North 
 const int r1LeftRed = 2, r1LeftYellow = 3, r1LeftGreen = 4;
 const int r1MidRed = 5, r1MidYellow = 6, r1MidGreen = 7;
 const int r1RightRed = 8, r1RightYellow = 9, r1RightGreen = 10;
 const int p1Red = 11, p1Green = 12;  // Pedestrian lights
 
-// Road 2 (3 lanes)
+// Road 2 (3 lanes) East 
 const int r2LeftRed = 22, r2LeftYellow = 23, r2LeftGreen = 24;
 const int r2MidRed = 25, r2MidYellow = 26, r2MidGreen = 27;
 const int r2RightRed = 28, r2RightYellow = 29, r2RightGreen = 30;
 const int p2Red = 31, p2Green = 32;
 
-// Road 3 (3 lanes)
+// Road 3 (3 lanes) South
 const int r3LeftRed = 33, r3LeftYellow = 34, r3LeftGreen = 35;
 const int r3MidRed = 36, r3MidYellow = 37, r3MidGreen = 38;
 const int r3RightRed = 39, r3RightYellow = 40, r3RightGreen = 41;
 const int p3Red = 42, p3Green = 43;
 
-// Road 4 (3 lanes)
+// Road 4 (3 lanes) West
 const int r4LeftRed = 44, r4LeftYellow = 45, r4LeftGreen = 46;
 const int r4MidRed = 47, r4MidYellow = 48, r4MidGreen = 49;
 const int r4RightRed = 50, r4RightYellow = 51, r4RightGreen = 52;
