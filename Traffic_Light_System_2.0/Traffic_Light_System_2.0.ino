@@ -55,30 +55,76 @@ void switchToGreen(TrafficLight light){
   setTrafficLight(light, 2); // Green
 }
 
-// Transition Green → Yellow → Red
-void switchToRed(TrafficLight light){
-  setTrafficLight(light, 2); // Green
-  delay(greenTime);
-  setTrafficLight(light, 1); // Yellow
-  delay(yellowTime);
-  setTrafficLight(light, 0); // Red
+void setAllRed(){
+  TrafficLight lights[] = {northL, northM, northR, eastL, eastM, eastR, southL, southM, southR, westL, westM, westR};
+  for (int i = 0; i < sizeof(lights) / sizeof(lights[0]); i++) {
+        setTrafficLight(lights[i], RED);  
+  }
+  digitalWrite(p1Red,HIGH);
+  digitalWrite(p2Red,HIGH);
+  digitalWrite(p3Red,HIGH);
+  digitalWrite(p4Red,HIGH);
 }
 
 //PHASE 1: N-S Through Traffic
 void phase1_NSThrough() {
+
+    switchToGreen(northL);
+    switchToGreen(southL);
+
     switchToGreen(northM);
     switchToGreen(southM);
     
-    switchToRed(northL);
-    switchToRed(northR);
-    
-    switchToRed(southL);
-    switchToRed(southR);
-    
-    switchToRed(eastM);
-    switchToRed(westM);
+    delay(greenTime);
+}
+
+//PHASE 2: N-S Right Traffic
+void phase2_NSRight() {
+
+    switchToGreen(northR);
+    switchToGreen(southR);
     
     delay(greenTime);
+}
+
+//PHASE 3: E-W Through Traffic
+void phase3_EWThrough() {
+
+    switchToGreen(eastL);
+    switchToGreen(westL);
+
+    switchToGreen(eastM);
+    switchToGreen(westM);
+    
+    delay(greenTime);
+}
+
+//PHASE 4: E-W Through Traffic
+void phase4_EWRight() {
+
+    switchToGreen(eastR);
+    switchToGreen(westR);
+    
+    delay(greenTime);
+}
+
+//PHASE 5: Predestrian Phase AllDirection Traffic
+void phase5_PedestrianAllDirection() {
+
+
+  digitalWrite(p1Red,LOW);
+  digitalWrite(p2Red,LOW);
+  digitalWrite(p3Red,LOW);
+  digitalWrite(p4Red,LOW);
+  
+  delay(safetyDelay);
+
+  digitalWrite(p1Green,HIGH);
+  digitalWrite(p2Green,HIGH);
+  digitalWrite(p3Green,HIGH);
+  digitalWrite(p4Green,HIGH);
+
+  delay(pedestrianTime);
 }
 
 void setup() {
@@ -90,7 +136,6 @@ void setup() {
         pinMode(light.red, OUTPUT);
         pinMode(light.yellow, OUTPUT);
         pinMode(light.green, OUTPUT);
-        setTrafficLight(light, RED); // Start with all red
     }
 
     // Initialize pedestrian lights
@@ -112,5 +157,15 @@ void setup() {
 }
 
 void loop() {
+  setAllRed();
   phase1_NSThrough();
+  setAllRed();
+  phase2_NSRight();
+  setAllRed();
+  phase3_EWThrough();
+  setAllRed();
+  phase4_EWRight();
+  setAllRed();
+  phase5_PedestrianAllDirection();
+  setAllRed();
 }
