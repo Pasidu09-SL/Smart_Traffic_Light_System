@@ -1,0 +1,7 @@
+path: /Users/pasindu/Downloads/Trafic_Light_Automated_System/YOLO_Train/Datasets
+train: images/train
+val: images/val
+
+names:
+	0: ambulance
+	1: cars

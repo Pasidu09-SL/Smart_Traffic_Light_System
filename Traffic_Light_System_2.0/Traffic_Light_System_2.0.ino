@@ -52,6 +52,8 @@ const int ULTRA_ECHO[] = {A4, A6, A8, A11, A13, A15};
 const int greenTime = 20000, yellowTime = 3000, rightTurnTime = 10000;
 const int pedestrianTime = 15000, safetyDelay = 1000;
 
+const int vehicleDetectionDistance = 10; // Distance threshold in cm
+
 // Enum for light states
 enum LightState { RED, YELLOW, GREEN };
 
@@ -96,65 +98,136 @@ void setAllRed(){
   digitalWrite(p4Red,HIGH);
 }
 
+// Function to measure distance using ultrasonic sensor
+long getDistance(int triggerPin, int echoPin) {
+    digitalWrite(triggerPin, LOW);
+    delayMicroseconds(2);
+    digitalWrite(triggerPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(triggerPin, LOW);
+    long duration = pulseIn(echoPin, HIGH);
+    long distance = duration * 0.034 / 2; // Convert to distance in cm
+
+    // Array to store lane names for each trigger pin
+    const char* laneNames[] = {
+        "North Left Side",   // Trigger pin A3
+        "North Middle Side", // Trigger pin A5
+        "North Right Side",  // Trigger pin A7
+        "East Left Side",    // Trigger pin A10
+        "East Middle Side",  // Trigger pin A12
+        "East Right Side"    // Trigger pin A14
+    };
+
+    // Find the index of the trigger pin in the ULTRA_TRIGGER array
+    int index = -1;
+    for (int i = 0; i < 6; i++) {
+        if (ULTRA_TRIGGER[i] == triggerPin) {
+            index = i;
+            break;
+        }
+    }
+
+    // If the trigger pin is found, print the lane name and distance
+    if (index != -1) {
+        Serial.print("Vehicle detected at ");
+        Serial.print(laneNames[index]);
+        Serial.print(": ");
+        Serial.print(distance); // Now 'distance' is in scope
+        Serial.println(" cm");
+        Serial.println("-----------------------------------------");
+    }
+
+    return distance; // Return the distance
+}
+
+// Check if a vehicle is detected within the threshold distance in a specific lane
+bool isVehicleDetected(int triggerPin, int echoPin) {
+    long distance = getDistance(triggerPin, echoPin);
+    return distance <= vehicleDetectionDistance; // Vehicle detected if distance <= 28 cm
+}
+
+// Check if a pedestrian is detected using PIR sensor
+bool isPedestrianDetected(int pirPin) {
+    return digitalRead(pirPin) == HIGH; // PIR sensor detects motion
+}
+
 //PHASE 1: N-S Through Traffic
 void phase1_NSThrough() {
 
-    switchToGreen(northL);
-    switchToGreen(southL);
+    bool northLeftDetected = isVehicleDetected(ULTRA_TRIGGER[0], ULTRA_ECHO[0]);
+    bool northMiddleDetected = isVehicleDetected(ULTRA_TRIGGER[1], ULTRA_ECHO[1]);
 
-    switchToGreen(northM);
-    switchToGreen(southM);
-    
-    delay(greenTime);
+    if (northLeftDetected || northMiddleDetected ) {
+        switchToGreen(northL);
+        switchToGreen(southL);
+        switchToGreen(northM);
+        switchToGreen(southM);
+        delay(greenTime);
+    }
 }
 
 //PHASE 2: N-S Right Traffic
 void phase2_NSRight() {
 
-    switchToGreen(northR);
-    switchToGreen(southR);
-    
-    delay(greenTime);
+    bool northRightDetected = isVehicleDetected(ULTRA_TRIGGER[2], ULTRA_ECHO[2]);
+
+    if (northRightDetected) {
+        switchToGreen(northR);
+        switchToGreen(southR);
+        delay(rightTurnTime);
+    }
 }
 
 //PHASE 3: E-W Through Traffic
 void phase3_EWThrough() {
 
-    switchToGreen(eastL);
-    switchToGreen(westL);
+    bool eastLeftDetected = isVehicleDetected(ULTRA_TRIGGER[3], ULTRA_ECHO[3]);
+    bool eastMiddleDetected = isVehicleDetected(ULTRA_TRIGGER[4], ULTRA_ECHO[4]);
 
-    switchToGreen(eastM);
-    switchToGreen(westM);
-    
-    delay(greenTime);
+    if (eastLeftDetected || eastMiddleDetected) {
+        switchToGreen(eastL);
+        switchToGreen(westL);
+        switchToGreen(eastM);
+        switchToGreen(westM);
+        delay(greenTime);
+    }
 }
 
 //PHASE 4: E-W Through Traffic
 void phase4_EWRight() {
 
-    switchToGreen(eastR);
-    switchToGreen(westR);
-    
-    delay(greenTime);
+    bool eastRightDetected = isVehicleDetected(ULTRA_TRIGGER[5], ULTRA_ECHO[5]);
+
+    if (eastRightDetected) {
+        switchToGreen(eastR);
+        switchToGreen(westR);
+        delay(rightTurnTime);
+    }
 }
 
 //PHASE 5: Predestrian Phase AllDirection Traffic
 void phase5_PedestrianAllDirection() {
 
+    bool pedestrianDetected = isPedestrianDetected(PIR_1) || isPedestrianDetected(PIR_2);
 
-  digitalWrite(p1Red,LOW);
-  digitalWrite(p2Red,LOW);
-  digitalWrite(p3Red,LOW);
-  digitalWrite(p4Red,LOW);
+    if (pedestrianDetected) {
+        Serial.println("Pedestrian detected");
+        digitalWrite(p1Red, LOW);
+        digitalWrite(p2Red, LOW);
+        digitalWrite(p3Red, LOW);
+        digitalWrite(p4Red, LOW);
 
-  delay(safetyDelay);
+        delay(safetyDelay);
 
-  digitalWrite(p1Green,HIGH);
-  digitalWrite(p2Green,HIGH);
-  digitalWrite(p3Green,HIGH);
-  digitalWrite(p4Green,HIGH);
+        digitalWrite(p1Green, HIGH);
+        digitalWrite(p2Green, HIGH);
+        digitalWrite(p3Green, HIGH);
+        digitalWrite(p4Green, HIGH);
 
-  delay(pedestrianTime);
+        delay(pedestrianTime);
+    } else{
+      Serial.println("Pedestrian not detected");
+    }
 }
 
 void setup() {
