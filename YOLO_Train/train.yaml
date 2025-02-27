@@ -1,4 +1,4 @@
-path: /Users/pasindu/Downloads/Trafic_Light_Automated_System/YOLO_Train/Datasets
+path: C:\Users\sadee\OneDrive\Desktop\YOLO_Train\Datasets
 train: images/train
 val: images/val
 

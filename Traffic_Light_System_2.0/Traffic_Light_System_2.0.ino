@@ -100,15 +100,15 @@ void setAllRed(){
 
 // Function to measure distance using ultrasonic sensor
 long getDistance(int triggerPin, int echoPin) {
-    digitalWrite(triggerPin, LOW);
-    delayMicroseconds(2);
     digitalWrite(triggerPin, HIGH);
     delayMicroseconds(10);
     digitalWrite(triggerPin, LOW);
-    long duration = pulseIn(echoPin, HIGH);
-    long distance = duration * 0.034 / 2; // Convert to distance in cm
 
-    // Array to store lane names for each trigger pin
+    // Read pulse duration
+    long duration = pulseIn(echoPin, HIGH);
+    int distance = duration / 58; // Convert to cm
+
+    // Lane names based on trigger pin
     const char* laneNames[] = {
         "North Left Side",   // Trigger pin A3
         "North Middle Side", // Trigger pin A5
@@ -118,7 +118,7 @@ long getDistance(int triggerPin, int echoPin) {
         "East Right Side"    // Trigger pin A14
     };
 
-    // Find the index of the trigger pin in the ULTRA_TRIGGER array
+    // Find the trigger pin index
     int index = -1;
     for (int i = 0; i < 6; i++) {
         if (ULTRA_TRIGGER[i] == triggerPin) {
@@ -127,17 +127,17 @@ long getDistance(int triggerPin, int echoPin) {
         }
     }
 
-    // If the trigger pin is found, print the lane name and distance
+    // Print lane information if detected
     if (index != -1) {
         Serial.print("Vehicle detected at ");
         Serial.print(laneNames[index]);
         Serial.print(": ");
-        Serial.print(distance); // Now 'distance' is in scope
+        Serial.print(distance);
         Serial.println(" cm");
         Serial.println("-----------------------------------------");
     }
 
-    return distance; // Return the distance
+    return distance;
 }
 
 // Check if a vehicle is detected within the threshold distance in a specific lane
@@ -263,9 +263,15 @@ void loop() {
   setAllRed();
   phase1_NSThrough();
   setAllRed();
+  phase5_PedestrianAllDirection();
+  setAllRed();
   phase2_NSRight();
   setAllRed();
+  phase5_PedestrianAllDirection();
+  setAllRed();
   phase3_EWThrough();
+  setAllRed();
+  phase5_PedestrianAllDirection();
   setAllRed();
   phase4_EWRight();
   setAllRed();
